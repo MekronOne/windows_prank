@@ -1,3 +1,4 @@
+import pyautogui
 import tkinter as tk
 import random
 import os
@@ -5,6 +6,14 @@ import os
 fonts=["bold", "italic", "underline"]
 usrname = os.getlogin()
 all_windows = []
+screenWidth, screenHeight = pyautogui.size()
+z=0
+xx, yy = pyautogui.position()
+
+def control_mouse():
+    while z >= 1:
+        if yy >= 900:
+            pyautogui.moveTo(xx , 0)
 
 def random_color():
     return "#{:02x}{:02x}{:02x}".format(
@@ -20,10 +29,6 @@ def contrasting_text_color(bg_hex):
     brightness = (r * 299 + g * 587 + b * 114) / 1000
     return "black" if brightness > 128 else "white"
 
-def on_motion_once(event):
-    event.widget.unbind("<Motion>")
-    on_window_close()
-
 def move_win(window, steps=30, delay=250):
     if steps <= 0:
         return
@@ -32,16 +37,16 @@ def move_win(window, steps=30, delay=250):
     window.geometry(f"+{x}+{y}")
     window.after(delay, move_win, window, steps - 1, delay)
 
-def start_jumping_all():
-    for win in all_windows[:]:
-        move_win(win, steps=150, delay=100)
-
-def on_window_close():
-    for _ in range(1000): 
+def on_window_close(event=None):
+    for _ in range(10): #увеличить количество окон
         create_new_window()
-    start_jumping_all()
+    for win in all_windows[:]:
+        move_win(win, steps=10, delay=100)
 
 def create_new_window():
+    global z 
+    z += 1
+    print(z)
     win = tk.Toplevel()
     #win.overrideredirect(True)#отключить верхнюю панель(свернуть,развернуть,закрыть)/Disable the top panel (collapse, expand, close)
 
@@ -64,7 +69,7 @@ def create_new_window():
     )
     label.pack(expand=True)
 
-    win.bind("<Motion>", on_motion_once)
+    win.bind("<Motion>", on_window_close)
     win.protocol("WM_DELETE_WINDOW", on_window_close)
 
     all_windows.append(win)
@@ -87,7 +92,7 @@ label = tk.Label(
 )
 label.pack(expand=True)
 
-root.bind("<Motion>", on_motion_once)
+root.bind("<Motion>", on_window_close)
 root.protocol("WM_DELETE_WINDOW", on_window_close)
 all_windows.append(root)
 
